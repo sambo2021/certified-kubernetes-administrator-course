@@ -9,30 +9,44 @@
       <details>
    
       ```
+      To upgrade controlplane
+      
       On Controlplane Node:-
-
+      apt-get update
+      apt-mark unhold kubeadm && \
+      apt-get update && apt-get install -y kubeadm=1.20.0-00 && \
+      apt-mark hold kubeadm
       kubectl drain controlplane --ignore-daemonsets
-      apt-get install kubeadm=1.20.0-00
-      kubeadm  upgrade plan
-      kubeadm  upgrade apply v1.20.0
-      apt-get install kubelet=1.20.0-00
+      kubeadm upgrade apply v1.20.0
+      kubectl uncordon controlplane 
+      apt-mark unhold kubelet kubectl && \
+      apt-get update && apt-get install -y kubelet=1.20.0-00 kubectl=1.20.0-00 && \
+      apt-mark hold kubelet kubectl
       systemctl daemon-reload
       systemctl restart kubelet
-      kubectl uncordon controlplane
-      kubectl drain node01 --ignore-daemonsets
+  
       
-      
-      On Worker Node:-
-      
+      To upgrade workernode
+  
+      At first On worker Node by "ssh node01":-
       apt-get update
+      apt-mark unhold kubeadm && \
+      apt-get update && apt-get install -y kubeadm=1.20.0-00 && \
+      apt-mark hold kubeadm
       apt-get install kubeadm=1.20.0-00
-      kubeadm upgrade node
-      apt-get install kubelet=1.20.0-00
-      systemctl daemon-reload
-      systemctl restart kubelet     
-
-      Back on Controlplane Node:-
       
+      Then On Controlplane Node:-
+      kubectl drain worker01 --ignore-daemonsets
+     
+      Then on Worker Node by "ssh node01" again:-
+      kubeadm upgrade node
+      apt-mark unhold kubelet kubectl && \
+      apt-get update && apt-get install -y kubelet=1.20.0-00 kubectl=1.20.0-00 && \
+      apt-mark hold kubelet kubectl
+      systemctl daemon-reload
+      systemctl restart kubelet 
+     
+      Finally back on Controlplane Node:-
       kubectl uncordon node01
       kubectl get pods -o wide | grep gold (make sure this is scheduled on controlplane node)
       ```
