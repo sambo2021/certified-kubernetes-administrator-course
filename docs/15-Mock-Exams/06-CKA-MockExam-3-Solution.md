@@ -117,7 +117,7 @@
      ```
      kubectl run dev-redis --image=redis:alpine
 
-     kubectl get pods -owide
+     kubectl get pods -o wide
      ```
 
      Deploy new pod `prod-redis` with toleration to be scheduled on `node01` worker node.
